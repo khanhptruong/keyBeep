@@ -4,8 +4,8 @@
 LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 	KBDLLHOOKSTRUCT* s = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
 
-	switch (wParam) {
-	case WM_KEYDOWN:
+	if (wParam == WM_KEYDOWN)
+	{
 		//char c = MapVirtualKey(s->vkCode, MAPVK_VK_TO_CHAR);
 
 		/*
@@ -16,13 +16,26 @@ LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 
 		https://stackoverflow.com/questions/21034935/playsound-in-c
 		*/
-		if (s->vkCode == VK_BACK)
-			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\Keyboard-Delete.wav", NULL, SND_FILENAME | SND_ASYNC);
-		else
-			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\Keyboard-Key.wav", NULL, SND_FILENAME | SND_ASYNC);
 
-		break;
+		switch (s->vkCode) {
+		case VK_RETURN:
+			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\lock.wav", NULL, SND_FILENAME | SND_ASYNC);
+			break;
+		case VK_BACK:
+			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\Keyboard-Delete.wav", NULL, SND_FILENAME | SND_ASYNC);
+			break;
+		case VK_LCONTROL:
+		case VK_RCONTROL:
+		case VK_LSHIFT:
+		case VK_RSHIFT:
+			//no sound
+			break;
+		default:
+			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\Keyboard-Key.wav", NULL, SND_FILENAME | SND_ASYNC);
+			break;
+		}
 	}
+		
 
 	return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
