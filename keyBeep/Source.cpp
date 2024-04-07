@@ -1,29 +1,22 @@
 #include <Windows.h>
 #include <iostream>
 
-int keyCount = 0;
-
-DWORD WINAPI beepThreadFunction(LPVOID lpParam) {
-	//std::cout << "." << std::endl;
-	while (keyCount != -1) {
-		if (keyCount > 3)
-			keyCount = 2;
-		else if (keyCount > 0)
-		{
-			Beep(300, 90);
-			keyCount--;
-		}
-	}
-	return 1;
-}
-
 LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 	KBDLLHOOKSTRUCT* s = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
 
 	switch (wParam) {
 	case WM_KEYDOWN:
 		//char c = MapVirtualKey(s->vkCode, MAPVK_VK_TO_CHAR);
-		keyCount++;
+
+		/*
+		Note for PlaySound:
+
+		Need to link winmm.lib library to use PlaySound.
+		Righ Click Project > properties > linker > input < add ;winmm.lib at the end
+
+		https://stackoverflow.com/questions/21034935/playsound-in-c
+		*/
+		PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\Keyboard-Key.wav", NULL, SND_FILENAME | SND_ASYNC);
 		break;
 	}
 
@@ -37,9 +30,6 @@ int main() {
 	std::cout << "Creating hook..." << std::endl;
 	HHOOK kbd = SetWindowsHookEx(WH_KEYBOARD_LL, &KBDHook, 0, 0);
 
-	std::cout << "Creating Beep Thread" << std::endl;
-	CreateThread(NULL, 0, beepThreadFunction, NULL, 0, NULL);
-
 	//win32 api message pump
 	//its like game loop... kinda...
 	std::cout << "Message pump looping..." << std::endl;
@@ -49,9 +39,8 @@ int main() {
 		DispatchMessage(&message);
 	}
 
-	std::cout << "Cleaning up hook and thread..." << std::endl;
+	std::cout << "Cleaning up hook..." << std::endl;
 	UnhookWindowsHookEx(kbd);
-	keyCount = -1;
 
 	return 0;
 }
