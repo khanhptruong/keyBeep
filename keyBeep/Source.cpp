@@ -19,9 +19,11 @@ LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 
 		switch (s->vkCode) {
 		case VK_RETURN:
+		case VK_ESCAPE:
 			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\lock.wav", NULL, SND_FILENAME | SND_ASYNC);
 			break;
 		case VK_BACK:
+		case VK_DELETE:
 			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\Keyboard-Delete.wav", NULL, SND_FILENAME | SND_ASYNC);
 			break;
 		case VK_LCONTROL:
