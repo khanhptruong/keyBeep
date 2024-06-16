@@ -30,6 +30,8 @@ LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 		case VK_RCONTROL:
 		case VK_LSHIFT:
 		case VK_RSHIFT:
+		case VK_LWIN:
+		case VK_RWIN:
 			//no sound
 			break;
 		default:
