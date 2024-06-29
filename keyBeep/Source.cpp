@@ -1,5 +1,26 @@
 #include <Windows.h>
 #include <iostream>
+#include <WinUser.h>
+
+void replaceKey(DWORD replacementKey)
+{
+	INPUT inputs[2] = {};
+	ZeroMemory(inputs, sizeof(inputs));
+
+	inputs[0].type = INPUT_KEYBOARD;
+	inputs[0].ki.wVk = replacementKey;
+
+	inputs[1].type = INPUT_KEYBOARD;
+	inputs[1].ki.wVk = replacementKey;
+	inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
+
+
+	UINT uSent = SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
+	if (uSent != ARRAYSIZE(inputs))
+	{
+		std::cout << "SendInput failed: 0x%x" << std::endl;
+	}
+}
 
 LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 	KBDLLHOOKSTRUCT* s = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
@@ -18,35 +39,32 @@ LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 		*/
 
 		switch (s->vkCode) {
-		case VK_RETURN:
-		case VK_ESCAPE:
-			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\lock.wav", NULL, SND_FILENAME | SND_ASYNC);
+		case 0x57: //W
+			replaceKey(VK_UP);
+			return 1; //if key is replaced, dont forward original key along
 			break;
-		case VK_BACK:
-		case VK_DELETE:
-			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\Keyboard-Delete.wav", NULL, SND_FILENAME | SND_ASYNC);
+		case 0x41: //A
+			replaceKey(VK_LEFT);
+			return 1; //if key is replaced, dont forward original key along
 			break;
-		case VK_LCONTROL:
-		case VK_RCONTROL:
-		case VK_LSHIFT:
-		case VK_RSHIFT:
-		case VK_LWIN:
-		case VK_RWIN:
-			//no sound
+		case 0x53: //S
+			replaceKey(VK_DOWN);
+			return 1; //if key is replaced, dont forward original key along
 			break;
-		default:
-			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\Keyboard-Key.wav", NULL, SND_FILENAME | SND_ASYNC);
+		case 0x44: //D
+			replaceKey(VK_RIGHT);
+			return 1; //if key is replaced, dont forward original key along
+			break;
+		default: //all other keys, forward along as usual
 			break;
 		}
 	}
-		
-
 	return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
 
 int main() {
-	std::cout << "Key Beep Start!" << std::endl;
+	std::cout << "Key Replace Start!" << std::endl;
 
 	std::cout << "Creating hook..." << std::endl;
 	HHOOK kbd = SetWindowsHookEx(WH_KEYBOARD_LL, &KBDHook, 0, 0);
