@@ -1,5 +1,17 @@
 #include <Windows.h>
 #include <iostream>
+//#include <fileapi.h>
+
+#define LOCK_WAV L"C:\\Users\\khanh\\portable\\khanh\\lock.wav"
+#define KB_DEL_WAV L"C:\\Users\\khanh\\portable\\khanh\\Keyboard-Delete.wav"
+#define KB_KEY_WAV L"C:\\Users\\khanh\\portable\\khanh\\Keyboard-Key.wav"
+
+bool isFileExist(LPCWSTR filePath)
+{
+	DWORD fileAttrib = GetFileAttributesW(filePath);
+	if (fileAttrib == INVALID_FILE_ATTRIBUTES) return false;
+	else									   return true;
+}
 
 LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 	KBDLLHOOKSTRUCT* s = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
@@ -20,11 +32,11 @@ LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 		switch (s->vkCode) {
 		case VK_RETURN:
 		case VK_ESCAPE:
-			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\lock.wav", NULL, SND_FILENAME | SND_ASYNC);
+			PlaySound(LOCK_WAV, NULL, SND_FILENAME | SND_ASYNC);
 			break;
 		case VK_BACK:
 		case VK_DELETE:
-			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\Keyboard-Delete.wav", NULL, SND_FILENAME | SND_ASYNC);
+			PlaySound(KB_DEL_WAV, NULL, SND_FILENAME | SND_ASYNC);
 			break;
 		case VK_LCONTROL:
 		case VK_RCONTROL:
@@ -35,7 +47,7 @@ LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 			//no sound
 			break;
 		default:
-			PlaySound(L"C:\\Users\\khanh\\source\\repos\\keyBeep\\keyBeep\\Keyboard-Key.wav", NULL, SND_FILENAME | SND_ASYNC);
+			PlaySound(KB_KEY_WAV, NULL, SND_FILENAME | SND_ASYNC);
 			break;
 		}
 	}
@@ -46,6 +58,16 @@ LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 
 
 int main() {
+	if (isFileExist(LOCK_WAV) && isFileExist(KB_DEL_WAV) && isFileExist(KB_KEY_WAV))
+	{
+		std::cout << "All sound files exist." << std::endl;
+	}
+	else 
+	{
+		std::cout << "One or more sound files missing." << std::endl;
+		return 1;
+	}
+
 	std::cout << "Key Beep Start!" << std::endl;
 
 	std::cout << "Creating hook..." << std::endl;
