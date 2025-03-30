@@ -1,10 +1,13 @@
 #include <Windows.h>
 #include <iostream>
+#include <csignal>
 //#include <fileapi.h>
 
 #define LOCK_WAV L"C:\\Users\\khanh\\portable\\khanh\\lock.wav"
 #define KB_DEL_WAV L"C:\\Users\\khanh\\portable\\khanh\\Keyboard-Delete.wav"
 #define KB_KEY_WAV L"C:\\Users\\khanh\\portable\\khanh\\Keyboard-Key.wav"
+
+HHOOK kbd; //needs to be global to use in atexit
 
 bool isFileExist(LPCWSTR filePath)
 {
@@ -56,6 +59,12 @@ LRESULT CALLBACK KBDHook(int nCode, WPARAM wParam, LPARAM lParam) {
 	return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
+void unhookAtExit(int sigNum) {
+	std::cout << "Cleaning up hook..." << std::endl;
+	UnhookWindowsHookEx(kbd);
+	std::cout << "Done." << std::endl;
+	exit(sigNum);
+}
 
 int main() {
 	if (isFileExist(LOCK_WAV) && isFileExist(KB_DEL_WAV) && isFileExist(KB_KEY_WAV))
@@ -70,8 +79,10 @@ int main() {
 
 	std::cout << "Key Beep Start!" << std::endl;
 
+	signal(SIGINT, unhookAtExit);
+
 	std::cout << "Creating hook..." << std::endl;
-	HHOOK kbd = SetWindowsHookEx(WH_KEYBOARD_LL, &KBDHook, 0, 0);
+	kbd = SetWindowsHookEx(WH_KEYBOARD_LL, &KBDHook, 0, 0);
 
 	//win32 api message pump
 	//its like game loop... kinda...
@@ -81,9 +92,6 @@ int main() {
 		TranslateMessage(&message);
 		DispatchMessage(&message);
 	}
-
-	std::cout << "Cleaning up hook..." << std::endl;
-	UnhookWindowsHookEx(kbd);
 
 	return 0;
 }
